@@ -23,7 +23,12 @@ function CandidateToolbar({
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
           />
-          <button className="search-btn">🔍</button>
+          <button className="search-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2"/>
+              <path d="M21 21L16.65 16.65" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
         </div>
         
         <div className="filter-box">
@@ -63,13 +68,17 @@ function CandidateToolbar({
         </div>
         
         <button className="btn btn-primary" onClick={onAddCandidate}>
-          + 지원자 추가
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 5V19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          지원자 추가
         </button>
       </div>
       
       {/* Tag Filters */}
       <div className="tag-filters">
-        {availableTags.technical.map(tag => (
+        {availableTags.technical && availableTags.technical.map(tag => (
           <button
             key={tag}
             className={`tag-filter ${selectedTags.includes(tag) ? 'active' : ''}`}
@@ -78,7 +87,7 @@ function CandidateToolbar({
             {tag}
           </button>
         ))}
-        {availableTags.experience.map(tag => (
+        {availableTags.experience && availableTags.experience.map(tag => (
           <button
             key={tag}
             className={`tag-filter ${selectedTags.includes(tag) ? 'active' : ''}`}

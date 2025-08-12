@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react'
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
 
 const DataContext = createContext()
 
@@ -27,25 +27,110 @@ export function DataProvider({ children }) {
       if (savedActivities) {
         setActivities(JSON.parse(savedActivities))
       }
+
+      // 데이터가 없으면 샘플 데이터 제공
+      if (!savedCandidates && !savedPosts && !savedActivities) {
+        console.log('샘플 데이터 생성 중...')
+        createSampleData()
+      }
     } catch (error) {
       console.error('데이터 로드 오류:', error)
+      // 오류 발생 시 샘플 데이터 생성
+      createSampleData()
     }
   }
 
-  const saveData = () => {
+  const createSampleData = () => {
+    const sampleCandidates = [
+      {
+        id: '1',
+        name: '김개발',
+        email: 'kim.dev@example.com',
+        phone: '010-1234-5678',
+        position: '프론트엔드 개발자',
+        status: 'new',
+        notes: 'React와 TypeScript에 능숙한 개발자',
+        technicalTags: ['React', 'TypeScript', 'Node.js'],
+        experienceTag: '경력',
+        portfolio: 'https://portfolio.example.com',
+        expectedSalary: '4000만원',
+        availableDate: '2024-03-01',
+        interviewNotes: '기술 면접 준비 필요',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      },
+      {
+        id: '2',
+        name: '이백엔드',
+        email: 'lee.backend@example.com',
+        phone: '010-2345-6789',
+        position: '백엔드 개발자',
+        status: 'screening',
+        notes: 'Spring Boot와 AWS 경험 풍부',
+        technicalTags: ['Java', 'Spring', 'AWS'],
+        experienceTag: '시니어',
+        portfolio: 'https://backend.example.com',
+        expectedSalary: '6000만원',
+        availableDate: '2024-02-15',
+        interviewNotes: '시스템 설계 경험 확인 필요',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }
+    ]
+
+    const samplePosts = [
+      {
+        id: '1',
+        title: '효과적인 면접 질문 작성법',
+        content: '지원자의 역량을 정확히 파악할 수 있는 면접 질문 작성 방법을 알아봅니다.',
+        author: 'HR팀',
+        category: '면접',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }
+    ]
+
+    const sampleActivities = [
+      {
+        id: '1',
+        type: '시스템 시작',
+        description: 'Smart ATS 시스템이 시작되었습니다.',
+        timestamp: new Date().toISOString()
+      }
+    ]
+
+    setCandidates(sampleCandidates)
+    setEducationPosts(samplePosts)
+    setActivities(sampleActivities)
+
+    // 샘플 데이터를 localStorage에 저장
+    try {
+      localStorage.setItem('ats-candidates', JSON.stringify(sampleCandidates))
+      localStorage.setItem('ats-education-posts', JSON.stringify(samplePosts))
+      localStorage.setItem('ats-activities', JSON.stringify(sampleActivities))
+      console.log('샘플 데이터 생성 및 저장 완료')
+    } catch (error) {
+      console.error('샘플 데이터 저장 오류:', error)
+    }
+  }
+
+  const saveData = useCallback(() => {
     try {
       localStorage.setItem('ats-candidates', JSON.stringify(candidates))
       localStorage.setItem('ats-education-posts', JSON.stringify(educationPosts))
       localStorage.setItem('ats-activities', JSON.stringify(activities))
+      console.log('데이터 저장 완료:', { candidates: candidates.length, posts: educationPosts.length, activities: activities.length })
     } catch (error) {
       console.error('데이터 저장 오류:', error)
     }
-  }
+  }, [candidates, educationPosts, activities])
 
   // 자동 저장
   useEffect(() => {
-    saveData()
-  }, [candidates, educationPosts, activities])
+    if (candidates.length > 0 || educationPosts.length > 0 || activities.length > 0) {
+      saveData()
+    }
+  }, [saveData])
 
   const addCandidate = (candidateData) => {
     const newCandidate = {

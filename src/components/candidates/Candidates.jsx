@@ -26,9 +26,9 @@ function Candidates() {
     let filtered = candidates.filter(candidate => {
       // Search filter
       const searchMatch = !searchTerm || 
-        candidate.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        candidate.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        candidate.position.toLowerCase().includes(searchTerm.toLowerCase())
+        (candidate.name && candidate.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (candidate.email && candidate.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (candidate.position && candidate.position.toLowerCase().includes(searchTerm.toLowerCase()))
 
       // Status filter
       const statusMatch = statusFilter === 'all' || candidate.status === statusFilter
@@ -36,7 +36,7 @@ function Candidates() {
       // Tag filter
       const tagMatch = selectedTags.length === 0 || 
         selectedTags.every(tag => 
-          candidate.technicalTags?.includes(tag) || 
+          (candidate.technicalTags && candidate.technicalTags.includes(tag)) || 
           candidate.experienceTag === tag
         )
 
@@ -49,20 +49,20 @@ function Candidates() {
 
       switch (sortBy) {
         case 'name':
-          aValue = a.name.toLowerCase()
-          bValue = b.name.toLowerCase()
+          aValue = (a.name || '').toLowerCase()
+          bValue = (b.name || '').toLowerCase()
           break
         case 'date':
-          aValue = new Date(a.createdAt)
-          bValue = new Date(b.createdAt)
+          aValue = new Date(a.createdAt || 0)
+          bValue = new Date(b.createdAt || 0)
           break
         case 'status':
-          aValue = a.status
-          bValue = b.status
+          aValue = a.status || ''
+          bValue = b.status || ''
           break
         default:
-          aValue = new Date(a.createdAt)
-          bValue = new Date(b.createdAt)
+          aValue = new Date(a.createdAt || 0)
+          bValue = new Date(b.createdAt || 0)
       }
 
       if (sortOrder === 'asc') {
@@ -81,7 +81,7 @@ function Candidates() {
     const experience = new Set()
 
     candidates.forEach(candidate => {
-      if (candidate.technicalTags) {
+      if (candidate.technicalTags && Array.isArray(candidate.technicalTags)) {
         candidate.technicalTags.forEach(tag => technical.add(tag))
       }
       if (candidate.experienceTag) {
@@ -113,6 +113,12 @@ function Candidates() {
       rejected: rejectedCount
     }
   }, [candidates])
+
+  // Safe percentage calculation
+  const getPercentage = (count, total) => {
+    if (total === 0) return 0
+    return Math.round((count / total) * 100)
+  }
 
   const handleAddCandidate = () => {
     setEditingCandidate(null)
@@ -213,7 +219,7 @@ function Candidates() {
           </div>
           <div className="stat-value">{stats.new}</div>
           <div className="stat-progress">
-            <div className="progress-bar" style={{ width: `${(stats.new / stats.total) * 100}%` }}></div>
+            <div className="progress-bar" style={{ width: `${getPercentage(stats.new, stats.total)}%` }}></div>
           </div>
         </div>
 
@@ -231,7 +237,7 @@ function Candidates() {
           </div>
           <div className="stat-value">{stats.interview}</div>
           <div className="stat-progress">
-            <div className="progress-bar" style={{ width: `${(stats.interview / stats.total) * 100}%` }}></div>
+            <div className="progress-bar" style={{ width: `${getPercentage(stats.interview, stats.total)}%` }}></div>
           </div>
         </div>
 
@@ -247,7 +253,7 @@ function Candidates() {
           </div>
           <div className="stat-value">{stats.offer}</div>
           <div className="stat-progress">
-            <div className="progress-bar" style={{ width: `${(stats.offer / stats.total) * 100}%` }}></div>
+            <div className="progress-bar" style={{ width: `${getPercentage(stats.offer, stats.total)}%` }}></div>
           </div>
         </div>
       </div>
@@ -271,7 +277,7 @@ function Candidates() {
                 <div 
                   className="progress-fill" 
                   style={{ 
-                    width: `${(count / stats.total) * 100}%`,
+                    width: `${getPercentage(count, stats.total)}%`,
                     backgroundColor: getStatusColor(status)
                   }}
                 ></div>
@@ -297,9 +303,9 @@ function Candidates() {
 
         <CandidateGrid
           candidates={filteredCandidates}
-          onEditCandidate={handleEditCandidate}
+          onEdit={handleEditCandidate}
           onScheduleInterview={handleScheduleInterview}
-          onEvaluateCandidate={handleEvaluateCandidate}
+          onEvaluate={handleEvaluateCandidate}
         />
       </div>
 
