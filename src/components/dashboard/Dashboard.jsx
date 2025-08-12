@@ -1,61 +1,93 @@
-import React, { useMemo } from 'react'
-import { useData } from '../../contexts/DataContext'
+import React from 'react'
 import StatsCards from './StatsCards'
 import StatusChart from './StatusChart'
 import RecentActivities from './RecentActivities'
 import TodayInterviews from './TodayInterviews'
 
 function Dashboard() {
-  const { candidates, activities } = useData()
+  // 샘플 데이터 - 실제로는 API나 컨텍스트에서 가져올 데이터
+  const sampleStatusCounts = {
+    new: 45,
+    screening: 32,
+    interview: 28,
+    offer: 15,
+    rejected: 23
+  }
 
-  const stats = useMemo(() => {
-    const total = candidates.length
-    const newCandidates = candidates.filter(c => {
-      const createdDate = new Date(c.createdAt)
-      const today = new Date()
-      return createdDate.toDateString() === today.toDateString()
-    }).length
-
-    const statusCounts = candidates.reduce((acc, candidate) => {
-      acc[candidate.status] = (acc[candidate.status] || 0) + 1
-      return acc
-    }, {})
-
-    return {
-      total,
-      new: newCandidates,
-      interview: statusCounts.interview || 0,
-      offer: statusCounts.offer || 0,
-      statusCounts
+  const sampleActivities = [
+    {
+      id: 1,
+      type: 'candidate_added',
+      message: '김철수 지원자가 추가되었습니다',
+      time: '2시간 전',
+      icon: '👤'
+    },
+    {
+      id: 2,
+      type: 'interview_scheduled',
+      message: '이영희 면접이 오늘 오후 2시로 예정되었습니다',
+      time: '4시간 전',
+      icon: '📅'
+    },
+    {
+      id: 3,
+      type: 'offer_sent',
+      message: '박민수에게 제안서가 발송되었습니다',
+      time: '1일 전',
+      icon: '📧'
     }
-  }, [candidates])
+  ]
 
-  const todayInterviews = useMemo(() => {
-    const today = new Date().toDateString()
-    return candidates.filter(candidate => {
-      return candidate.interviews?.some(interview => {
-        const interviewDate = new Date(interview.date)
-        return interviewDate.toDateString() === today
-      })
-    })
-  }, [candidates])
+  const sampleInterviews = [
+    {
+      id: 1,
+      candidate: '김철수',
+      position: '프론트엔드 개발자',
+      time: '오후 2:00',
+      status: 'scheduled',
+      avatar: '👨‍💻'
+    },
+    {
+      id: 2,
+      candidate: '이영희',
+      position: '백엔드 개발자',
+      time: '오후 3:30',
+      status: 'scheduled',
+      avatar: '👩‍💻'
+    },
+    {
+      id: 3,
+      candidate: '박민수',
+      position: 'UI/UX 디자이너',
+      time: '오후 5:00',
+      status: 'completed',
+      avatar: '🎨'
+    }
+  ]
 
   return (
-    <div className="content-section active">
-      <h2 className="section-title">대시보드</h2>
+    <div className="dashboard">
+      <div className="dashboard-header">
+        <h1 className="dashboard-title">대시보드</h1>
+        <p className="dashboard-subtitle">
+          오늘의 채용 현황과 주요 지표를 한눈에 확인하세요
+        </p>
+      </div>
+      
+      <StatsCards />
+      
       <div className="dashboard-grid">
-        <StatsCards
-          total={stats.total}
-          newCount={stats.new}
-          interviewCount={stats.interview}
-          offerCount={stats.offer}
-        />
+        <div className="chart-section">
+          <StatusChart statusCounts={sampleStatusCounts} />
+        </div>
         
-        <StatusChart statusCounts={stats.statusCounts} />
-        
-        <RecentActivities activities={activities.slice(0, 10)} />
-        
-        <TodayInterviews interviews={todayInterviews} />
+        <div className="activities-section">
+          <RecentActivities activities={sampleActivities} />
+        </div>
+      </div>
+      
+      <div className="interviews-section">
+        <TodayInterviews interviews={sampleInterviews} />
       </div>
     </div>
   )

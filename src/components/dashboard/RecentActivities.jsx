@@ -1,75 +1,83 @@
 import React from 'react'
 
-function RecentActivities({ activities }) {
-  const formatTime = (timestamp) => {
-    const date = new Date(timestamp)
-    const now = new Date()
-    const diff = now - date
+function TodayInterviews({ interviews = [] }) {
+  // 안전한 데이터 처리
+  const safeInterviews = interviews || []
 
-    if (diff < 60 * 1000) {
-      return '방금 전'
-    } else if (diff < 60 * 60 * 1000) {
-      return `${Math.floor(diff / (60 * 1000))}분 전`
-    } else if (diff < 24 * 60 * 60 * 1000) {
-      return `${Math.floor(diff / (60 * 60 * 1000))}시간 전`
-    } else {
-      return date.toLocaleDateString('ko-KR', {
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      })
+  if (safeInterviews.length === 0) {
+    return (
+      <div className="interview-notifications">
+        <h3>오늘 면접</h3>
+        <div className="notification-list">
+          <div className="empty-interview">
+            <div className="empty-interview-icon">📅</div>
+            <p>오늘 예정된 면접이 없습니다</p>
+            <small>편안한 하루 되세요!</small>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'scheduled':
+        return '#3B82F6'
+      case 'completed':
+        return '#10B981'
+      case 'cancelled':
+        return '#EF4444'
+      default:
+        return '#6B7280'
     }
   }
 
-  const getActivityIcon = (type) => {
-    switch (type) {
-      case '새 지원자 추가':
-        return '👤'
-      case '지원자 정보 수정':
-        return '✏️'
-      case '지원자 삭제':
-        return '🗑️'
-      case '교육 게시물 작성':
-        return '📝'
-      case '교육 게시물 삭제':
-        return '🗑️'
-      case '데이터 복원':
-        return '📥'
+  const getStatusText = (status) => {
+    switch (status) {
+      case 'scheduled':
+        return '예정됨'
+      case 'completed':
+        return '완료됨'
+      case 'cancelled':
+        return '취소됨'
       default:
-        return '📋'
+        return '알 수 없음'
     }
   }
 
   return (
-    <div className="recent-activities">
-      <h3>최근 활동</h3>
-      <div className="activity-list">
-        {activities.length === 0 ? (
-          <div className="activity-item">
-            <div className="activity-icon">📝</div>
-            <div className="activity-content">
-              <div className="activity-title">활동 없음</div>
-              <div className="activity-time">아직 활동이 없습니다</div>
+    <div className="interview-notifications">
+      <h3>오늘 면접</h3>
+      <div className="notification-list">
+        {safeInterviews.map((interview) => (
+          <div key={interview.id} className="notification-item">
+            <div className="notification-icon">
+              {interview.avatar || '👤'}
+            </div>
+            <div className="notification-content">
+              <div className="notification-title">
+                {interview.candidate}
+              </div>
+              <div className="notification-details">
+                <span className="position-badge">
+                  {interview.position}
+                </span>
+                <span className="time-badge">
+                  {interview.time}
+                </span>
+                <span 
+                  className="status-badge"
+                  style={{ backgroundColor: getStatusColor(interview.status) }}
+                >
+                  {getStatusText(interview.status)}
+                </span>
+              </div>
             </div>
           </div>
-        ) : (
-          activities.map(activity => (
-            <div key={activity.id} className="activity-item">
-              <div className="activity-icon">
-                {getActivityIcon(activity.type)}
-              </div>
-              <div className="activity-content">
-                <div className="activity-title">{activity.type}</div>
-                <div className="activity-description">{activity.description}</div>
-                <div className="activity-time">{formatTime(activity.timestamp)}</div>
-              </div>
-            </div>
-          ))
-        )}
+        ))}
       </div>
     </div>
   )
 }
 
-export default RecentActivities
+export default TodayInterviews

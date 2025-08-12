@@ -1,10 +1,10 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
 import { Doughnut } from 'react-chartjs-2'
 
 ChartJS.register(ArcElement, Tooltip, Legend)
 
-function StatusChart({ statusCounts }) {
+function StatusChart({ statusCounts = {} }) {
   const statusLabels = {
     new: '신규',
     screening: '서류심사',
@@ -21,12 +21,32 @@ function StatusChart({ statusCounts }) {
     rejected: '#EF4444'
   }
 
+  // 안전한 데이터 처리
+  const safeStatusCounts = statusCounts || {}
+  const statusKeys = Object.keys(safeStatusCounts)
+  
+  // 데이터가 없거나 빈 객체인 경우 처리
+  if (!statusCounts || statusKeys.length === 0) {
+    return (
+      <div className="chart-section">
+        <div className="chart-container">
+          <h3>지원자 상태 분포</h3>
+          <div className="empty-chart">
+            <div className="empty-chart-icon">📊</div>
+            <p>지원자 데이터가 없습니다</p>
+            <small>새로운 지원자를 추가하면 차트가 표시됩니다</small>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   const data = {
-    labels: Object.keys(statusCounts).map(status => statusLabels[status] || status),
+    labels: statusKeys.map(status => statusLabels[status] || status),
     datasets: [
       {
-        data: Object.values(statusCounts),
-        backgroundColor: Object.keys(statusCounts).map(status => statusColors[status] || '#6B7280'),
+        data: statusKeys.map(status => safeStatusCounts[status] || 0),
+        backgroundColor: statusKeys.map(status => statusColors[status] || '#6B7280'),
         borderColor: '#ffffff',
         borderWidth: 2,
         hoverBorderWidth: 3
@@ -66,25 +86,6 @@ function StatusChart({ statusCounts }) {
       }
     },
     cutout: '60%'
-  }
-
-  if (Object.keys(statusCounts).length === 0) {
-    return (
-      <div className="chart-section">
-        <div className="chart-container">
-          <h3>지원자 상태 분포</h3>
-          <div style={{ 
-            height: '300px', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center',
-            color: '#6B7280'
-          }}>
-            지원자가 없습니다
-          </div>
-        </div>
-      </div>
-    )
   }
 
   return (

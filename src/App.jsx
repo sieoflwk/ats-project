@@ -11,6 +11,7 @@ import Education from './components/education/Education'
 import Backup from './components/backup/Backup'
 import ProtectedRoute from './components/auth/ProtectedRoute'
 import { ToastProvider } from './contexts/ToastContext'
+import './style.css'
 
 function App() {
   return (

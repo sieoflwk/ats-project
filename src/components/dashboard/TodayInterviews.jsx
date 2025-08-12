@@ -1,51 +1,47 @@
 import React from 'react'
 
-function TodayInterviews({ interviews }) {
-  const getTodayInterviews = () => {
-    const today = new Date().toDateString()
-    const todayInterviews = []
+function TodayInterviews({ interviews = [] }) {
+  // 안전한 데이터 처리
+  const safeInterviews = interviews || []
 
-    interviews.forEach(candidate => {
-      if (candidate.interviews) {
-        candidate.interviews.forEach(interview => {
-          const interviewDate = new Date(interview.date)
-          if (interviewDate.toDateString() === today) {
-            todayInterviews.push({
-              ...interview,
-              candidateName: candidate.name,
-              candidatePosition: candidate.position
-            })
-          }
-        })
-      }
-    })
-
-    return todayInterviews.sort((a, b) => new Date(a.date) - new Date(b.date))
+  if (safeInterviews.length === 0) {
+    return (
+      <div className="interview-notifications">
+        <h3>오늘 면접</h3>
+        <div className="notification-list">
+          <div className="empty-interview">
+            <div className="empty-interview-icon">📅</div>
+            <p>오늘 예정된 면접이 없습니다</p>
+            <small>편안한 하루 되세요!</small>
+          </div>
+        </div>
+      </div>
+    )
   }
 
-  const todayInterviews = getTodayInterviews()
-
-  const formatTime = (dateString) => {
-    const date = new Date(dateString)
-    return date.toLocaleTimeString('ko-KR', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false
-    })
-  }
-
-  const getTypeColor = (type) => {
-    switch (type) {
-      case '1차':
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'scheduled':
         return '#3B82F6'
-      case '2차':
-        return '#F59E0B'
-      case '최종':
+      case 'completed':
         return '#10B981'
-      case '기술':
-        return '#8B5CF6'
+      case 'cancelled':
+        return '#EF4444'
       default:
         return '#6B7280'
+    }
+  }
+
+  const getStatusText = (status) => {
+    switch (status) {
+      case 'scheduled':
+        return '예정됨'
+      case 'completed':
+        return '완료됨'
+      case 'cancelled':
+        return '취소됨'
+      default:
+        return '알 수 없음'
     }
   }
 
@@ -53,47 +49,32 @@ function TodayInterviews({ interviews }) {
     <div className="interview-notifications">
       <h3>오늘 면접</h3>
       <div className="notification-list">
-        {todayInterviews.length === 0 ? (
-          <div className="notification-item">
-            <div className="notification-icon">📅</div>
-            <div className="notification-content">
-              <div className="notification-title">오늘 예정된 면접이 없습니다</div>
-              <div className="notification-time">편안한 하루 되세요!</div>
+        {safeInterviews.map((interview) => (
+          <div key={interview.id} className="notification-item">
+            <div className="notification-icon">
+              {interview.avatar || '👤'}
             </div>
-          </div>
-        ) : (
-          todayInterviews.map((interview, index) => (
-            <div key={index} className="notification-item">
-              <div className="notification-icon">🎯</div>
-              <div className="notification-content">
-                <div className="notification-title">
-                  {interview.candidateName} ({interview.candidatePosition})
-                </div>
-                <div className="notification-details">
-                  <span 
-                    className="interview-type-badge"
-                    style={{ backgroundColor: getTypeColor(interview.type) }}
-                  >
-                    {interview.type} 면접
-                  </span>
-                  <span className="notification-time">
-                    {formatTime(interview.date)}
-                  </span>
-                  {interview.location && (
-                    <span className="notification-location">
-                      📍 {interview.location}
-                    </span>
-                  )}
-                </div>
-                {interview.notes && (
-                  <div className="notification-notes">
-                    💬 {interview.notes}
-                  </div>
-                )}
+            <div className="notification-content">
+              <div className="notification-title">
+                {interview.candidate}
+              </div>
+              <div className="notification-details">
+                <span className="position-badge">
+                  {interview.position}
+                </span>
+                <span className="time-badge">
+                  {interview.time}
+                </span>
+                <span 
+                  className="status-badge"
+                  style={{ backgroundColor: getStatusColor(interview.status) }}
+                >
+                  {getStatusText(interview.status)}
+                </span>
               </div>
             </div>
-          ))
-        )}
+          </div>
+        ))}
       </div>
     </div>
   )
